@@ -1,6 +1,8 @@
 package com.hospital.doctor;
 
 import com.hospital.slot.SlotStatus;
+import com.hospital.symptom.dto.SuggestedDoctorRow;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -58,5 +60,47 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
             @Param("date") LocalDate date,
             @Param("earliestStart") LocalTime earliestStart,
             @Param("slotStatus") SlotStatus slotStatus
+    );
+
+    @Query("""
+            select new com.hospital.symptom.dto.SuggestedDoctorRow(
+                d.id,
+                d.name,
+                d.specialization,
+                d.experienceYears,
+                h.id,
+                h.name,
+                h.city,
+                s.id,
+                s.slotDate,
+                s.startTime
+            )
+            from Doctor d
+            join d.hospital h
+            join Slot s on s.doctor = d
+            where d.department.id = :departmentId
+              and d.active = true
+              and h.active = true
+              and s.status = :status
+              and (s.slotDate > :today
+                   or (s.slotDate = :today and s.startTime >= :currentTime))
+              and not exists (
+                  select 1
+                  from Slot earlier
+                  where earlier.doctor = d
+                    and earlier.status = :status
+                    and (earlier.slotDate > :today
+                         or (earlier.slotDate = :today and earlier.startTime >= :currentTime))
+                    and (earlier.slotDate < s.slotDate
+                         or (earlier.slotDate = s.slotDate and earlier.startTime < s.startTime))
+              )
+            order by s.slotDate asc, s.startTime asc, d.id asc
+            """)
+    List<SuggestedDoctorRow> findSuggestedDoctors(
+            @Param("departmentId") Long departmentId,
+            @Param("today") LocalDate today,
+            @Param("currentTime") LocalTime currentTime,
+            @Param("status") SlotStatus status,
+            Pageable pageable
     );
 }
