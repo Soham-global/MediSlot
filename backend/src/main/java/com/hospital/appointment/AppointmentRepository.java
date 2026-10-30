@@ -21,6 +21,47 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     boolean existsBySlotIdAndStatusNot(Long slotId, AppointmentStatus status);
 
+    boolean existsByDoctorId(Long doctorId);
+
+    @Query("""
+            select count(a)
+            from Appointment a
+            where a.hospital.id = :hospitalId
+              and a.slot.slotDate = :slotDate
+              and a.status in :statuses
+            """)
+    long countByHospitalIdAndSlotDateAndStatusIn(
+            @Param("hospitalId") Long hospitalId,
+            @Param("slotDate") LocalDate slotDate,
+            @Param("statuses") List<AppointmentStatus> statuses
+    );
+
+    @Query("""
+            select count(a)
+            from Appointment a
+            where a.hospital.id = :hospitalId
+              and a.status = :status
+              and a.slot.slotDate >= :fromDate
+            """)
+    long countByHospitalIdAndStatusFromDate(
+            @Param("hospitalId") Long hospitalId,
+            @Param("status") AppointmentStatus status,
+            @Param("fromDate") LocalDate fromDate
+    );
+
+    @Query("""
+            select count(a)
+            from Appointment a
+            where a.doctor.id = :doctorId
+              and a.status in :statuses
+              and a.slot.slotDate >= :fromDate
+            """)
+    long countByDoctorIdAndStatusInFromDate(
+            @Param("doctorId") Long doctorId,
+            @Param("statuses") List<AppointmentStatus> statuses,
+            @Param("fromDate") LocalDate fromDate
+    );
+
     @Query("""
             select a
             from Appointment a

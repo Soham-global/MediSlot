@@ -22,6 +22,55 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
     List<Doctor> findByActiveTrue();
 
+    long countByHospitalIdAndActiveTrue(Long hospitalId);
+
+    @Query("""
+            select d
+            from Doctor d
+            join fetch d.department
+            where d.hospital.id = :hospitalId
+              and (:departmentId is null or d.department.id = :departmentId)
+              and (:namePattern is null or lower(d.name) like :namePattern)
+              and (:isActive is null or d.active = :isActive)
+            order by lower(d.name), d.id
+            """)
+    List<Doctor> findAdminDoctors(
+            @Param("hospitalId") Long hospitalId,
+            @Param("departmentId") Long departmentId,
+            @Param("namePattern") String namePattern,
+            @Param("isActive") Boolean isActive
+    );
+
+    @Query("""
+            select d
+            from Doctor d
+            join fetch d.department
+            join fetch d.hospital
+            where d.id = :id
+              and d.hospital.id = :hospitalId
+            """)
+    Optional<Doctor> findByIdAndHospitalIdWithDetails(
+            @Param("id") Long id,
+            @Param("hospitalId") Long hospitalId
+    );
+
+    @Query("""
+            select count(distinct d)
+            from Doctor d
+            join Slot s on s.doctor = d
+            where d.hospital.id = :hospitalId
+              and d.active = true
+              and s.slotDate = :date
+              and s.startTime >= :currentTime
+              and s.status = :status
+            """)
+    long countAvailableDoctorsToday(
+            @Param("hospitalId") Long hospitalId,
+            @Param("date") LocalDate date,
+            @Param("currentTime") LocalTime currentTime,
+            @Param("status") SlotStatus status
+    );
+
     @Query("""
             select d
             from Doctor d

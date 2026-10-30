@@ -3,6 +3,7 @@ package com.hospital.slot;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,6 +21,12 @@ public interface SlotRepository extends JpaRepository<Slot, Long> {
     Optional<Slot> findByDoctorIdAndSlotDateAndStartTime(Long doctorId, LocalDate slotDate, LocalTime startTime);
 
     List<Slot> findByStatus(SlotStatus status);
+
+    boolean existsByDoctorIdAndStatus(Long doctorId, SlotStatus status);
+
+    @Modifying
+    @Query("delete from Slot s where s.doctor.id = :doctorId")
+    int deleteAllByDoctorId(@Param("doctorId") Long doctorId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select s from Slot s where s.id = :id")
