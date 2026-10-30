@@ -22,6 +22,40 @@ public interface SlotRepository extends JpaRepository<Slot, Long> {
 
     List<Slot> findByStatus(SlotStatus status);
 
+    List<Slot> findByDoctorIdAndSlotDateOrderByStartTimeAsc(Long doctorId, LocalDate slotDate);
+
+    List<Slot> findByDoctorIdAndSlotDateBetweenOrderBySlotDateAscStartTimeAsc(
+            Long doctorId,
+            LocalDate startDate,
+            LocalDate endDate
+    );
+
+    List<Slot> findByDoctorIdAndSlotDateGreaterThanEqualAndStatusOrderBySlotDateAscStartTimeAsc(
+            Long doctorId,
+            LocalDate fromDate,
+            SlotStatus status
+    );
+
+    List<Slot> findByDoctorIdAndSlotDateBetweenAndStatusOrderBySlotDateAscStartTimeAsc(
+            Long doctorId,
+            LocalDate fromDate,
+            LocalDate toDate,
+            SlotStatus status
+    );
+
+    @Query("""
+            select s
+            from Slot s
+            join fetch s.doctor d
+            join fetch d.hospital h
+            where s.id = :id
+              and h.id = :hospitalId
+            """)
+    Optional<Slot> findByIdAndHospitalIdWithDoctor(
+            @Param("id") Long id,
+            @Param("hospitalId") Long hospitalId
+    );
+
     boolean existsByDoctorIdAndStatus(Long doctorId, SlotStatus status);
 
     @Modifying

@@ -1,5 +1,6 @@
 package com.hospital.appointment;
 
+import com.hospital.slot.admin.dto.AdminSlotAppointmentRow;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -60,6 +61,42 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("doctorId") Long doctorId,
             @Param("statuses") List<AppointmentStatus> statuses,
             @Param("fromDate") LocalDate fromDate
+    );
+
+    @Query("""
+            select count(a)
+            from Appointment a
+            where a.doctor.id = :doctorId
+              and a.status in :statuses
+              and a.slot.slotDate between :fromDate and :toDate
+              and (:startTime is null or a.slot.startTime >= :startTime)
+              and (:endTime is null or a.slot.startTime < :endTime)
+            """)
+    long countActiveAppointmentsForDoctorInRange(
+            @Param("doctorId") Long doctorId,
+            @Param("statuses") List<AppointmentStatus> statuses,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate,
+            @Param("startTime") LocalTime startTime,
+            @Param("endTime") LocalTime endTime
+    );
+
+    @Query("""
+            select new com.hospital.slot.admin.dto.AdminSlotAppointmentRow(
+                a.slot.id,
+                a.id,
+                a.status,
+                e.name,
+                e.employeeCode
+            )
+            from Appointment a
+            join a.employee e
+            where a.slot.id in :slotIds
+              and a.status <> :cancelledStatus
+            """)
+    List<AdminSlotAppointmentRow> findAppointmentSummariesBySlotIds(
+            @Param("slotIds") List<Long> slotIds,
+            @Param("cancelledStatus") AppointmentStatus cancelledStatus
     );
 
     @Query("""
