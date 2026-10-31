@@ -1124,3 +1124,131 @@ select.input {
     width: 100%;
   }
 }
+/* Paste this at the BOTTOM of src/styles/global.css (once) */
+
+/* ---------- Admin appointments ---------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.btn-sm {
+  min-height: 34px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.btn-outline {
+  border-color: var(--border);
+  background: var(--card);
+  color: var(--text);
+}
+
+.btn-outline:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.filters.filters-4 {
+  grid-template-columns: 2fr 1fr 1fr auto;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transition: opacity 0.18s ease;
+}
+
+.table-wrap.is-loading {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.table {
+  width: 100%;
+  min-width: 820px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table tbody tr:hover {
+  background: #fafcfb;
+}
+
+.cell-title {
+  font-weight: 600;
+}
+
+.cell-reason {
+  max-width: 260px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.cell-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.table-skeleton {
+  min-height: 320px;
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.pager-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+@media (max-width: 720px) {
+  .filters.filters-4 {
+    grid-template-columns: 1fr;
+  }
+}
