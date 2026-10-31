@@ -1385,3 +1385,55 @@ button:disabled {
     grid-column: 1 / -1;
   }
 }
+/* Paste this at the BOTTOM of src/styles/global.css (once) */
+
+/* ---------- Admin doctors ---------- */
+
+.page-head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.badge-active   { background: #e3f4ea; color: #1b7a43; }
+.badge-inactive { background: #eef0ef; color: #5d6a65; }
+
+.table-count {
+  margin-bottom: 10px;
+}
+
+.field {
+  margin-top: 18px;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.field .input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.field-error {
+  margin: 6px 0 0;
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 560px) {
+  .field-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
