@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import BookingModal from '../components/BookingModal';
 import {
   fetchDepartments,
   fetchDoctors,
@@ -26,7 +27,7 @@ function initials(name) {
     .toUpperCase();
 }
 
-function DoctorCard({ doctor }) {
+function DoctorCard({ doctor, onBook }) {
   return (
     <article className="card doctor-card">
       <div className="doctor-top">
@@ -56,8 +57,11 @@ function DoctorCard({ doctor }) {
         </div>
       </dl>
 
-      {/* Next step: this button opens your booking modal */}
-      <button type="button" className="btn btn-primary">
+      <button
+        type="button"
+        className="btn btn-primary"
+        onClick={() => onBook(doctor)}
+      >
         View slots
       </button>
     </article>
@@ -81,6 +85,7 @@ export default function DoctorsPage() {
   const [doctors, setDoctors] = useState([]);
   const [status, setStatus] = useState('loading'); // loading | ready | error
   const [reloadKey, setReloadKey] = useState(0);
+  const [bookingDoctor, setBookingDoctor] = useState(null);
 
   // Dropdown options: load once
   useEffect(() => {
@@ -191,9 +196,20 @@ export default function DoctorsPage() {
       ) : (
         <div className="doctor-grid">
           {doctors.map((doctor) => (
-            <DoctorCard key={doctor.id} doctor={doctor} />
+            <DoctorCard
+              key={doctor.id}
+              doctor={doctor}
+              onBook={setBookingDoctor}
+            />
           ))}
         </div>
+      )}
+
+      {bookingDoctor && (
+        <BookingModal
+          doctor={bookingDoctor}
+          onClose={() => setBookingDoctor(null)}
+        />
       )}
     </section>
   );

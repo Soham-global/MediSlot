@@ -23,3 +23,11 @@ export async function fetchDepartments() {
   const { data } = await client.get('/api/departments');
   return data;
 }
+
+// date must be "YYYY-MM-DD" and cannot be in the past
+export async function fetchDoctorSlots(doctorId, date) {
+  const { data } = await client.get(`/api/doctors/${doctorId}/slots`, {
+    params: { date },
+  });
+  return data;
+}
