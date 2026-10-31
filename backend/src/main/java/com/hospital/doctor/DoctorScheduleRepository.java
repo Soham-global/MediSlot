@@ -1,6 +1,9 @@
 package com.hospital.doctor;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -10,5 +13,11 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
 
     List<DoctorSchedule> findByDoctorIdAndActiveTrue(Long doctorId);
 
+    List<DoctorSchedule> findByDoctorIdAndActiveTrueOrderByDayOfWeekAscStartTimeAsc(Long doctorId);
+
     List<DoctorSchedule> findByDoctorIdAndDayOfWeek(Long doctorId, int dayOfWeek);
+
+    @Modifying
+    @Query("delete from DoctorSchedule ds where ds.doctor.id = :doctorId")
+    int deleteAllByDoctorId(@Param("doctorId") Long doctorId);
 }
