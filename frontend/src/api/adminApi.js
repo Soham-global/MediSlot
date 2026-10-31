@@ -30,3 +30,10 @@ export async function fetchAdminDoctors(params = {}) {
   });
   return data;
 }
+
+// { hospitalName, todayAppointments, pendingAppointments,
+//   completedToday, totalDoctors, doctorsAvailableToday }
+export async function fetchDashboard() {
+  const { data } = await client.get('/api/admin/dashboard');
+  return data;
+}
