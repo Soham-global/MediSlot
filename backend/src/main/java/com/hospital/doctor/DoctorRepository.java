@@ -54,6 +54,8 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
             @Param("hospitalId") Long hospitalId
     );
 
+    boolean existsByIdAndHospitalId(Long id, Long hospitalId);
+
     @Query("""
             select count(distinct d)
             from Doctor d

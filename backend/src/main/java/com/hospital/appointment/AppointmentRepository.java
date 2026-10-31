@@ -1,6 +1,8 @@
 package com.hospital.appointment;
 
 import com.hospital.slot.admin.dto.AdminSlotAppointmentRow;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -97,6 +99,54 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<AdminSlotAppointmentRow> findAppointmentSummariesBySlotIds(
             @Param("slotIds") List<Long> slotIds,
             @Param("cancelledStatus") AppointmentStatus cancelledStatus
+    );
+
+    @Query(
+            value = """
+                    select a
+                    from Appointment a
+                    join fetch a.employee
+                    join fetch a.doctor d
+                    join fetch d.department
+                    join fetch a.slot s
+                    where a.hospital.id = :hospitalId
+                      and (:doctorId is null or d.id = :doctorId)
+                      and (:date is null or s.slotDate = :date)
+                      and (:status is null or a.status = :status)
+                    order by s.slotDate desc, s.startTime desc, a.id desc
+                    """,
+            countQuery = """
+                    select count(a)
+                    from Appointment a
+                    join a.doctor d
+                    join a.slot s
+                    where a.hospital.id = :hospitalId
+                      and (:doctorId is null or d.id = :doctorId)
+                      and (:date is null or s.slotDate = :date)
+                      and (:status is null or a.status = :status)
+                    """
+    )
+    Page<Appointment> findAdminAppointments(
+            @Param("hospitalId") Long hospitalId,
+            @Param("doctorId") Long doctorId,
+            @Param("date") LocalDate date,
+            @Param("status") AppointmentStatus status,
+            Pageable pageable
+    );
+
+    @Query("""
+            select a
+            from Appointment a
+            join fetch a.employee
+            join fetch a.doctor d
+            join fetch d.department
+            join fetch a.slot
+            where a.id = :id
+              and a.hospital.id = :hospitalId
+            """)
+    Optional<Appointment> findDetailedByIdAndHospitalId(
+            @Param("id") Long id,
+            @Param("hospitalId") Long hospitalId
     );
 
     @Query("""

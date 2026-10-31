@@ -167,6 +167,26 @@ public class AppointmentService {
                 .findDetailedByIdAndEmployeeId(appointmentId, employeeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
 
+        cancelAppointmentInternal(appointment, slot, CancelledBy.EMPLOYEE);
+
+        return toResponse(appointment);
+    }
+
+    @Transactional
+    public Appointment cancelAppointmentForAdmin(Appointment appointment) {
+        Slot slot = slotRepository.findByIdForUpdate(appointment.getSlot().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Slot not found"));
+
+        cancelAppointmentInternal(appointment, slot, CancelledBy.ADMIN);
+
+        return appointment;
+    }
+
+    private void cancelAppointmentInternal(
+            Appointment appointment,
+            Slot slot,
+            CancelledBy cancelledBy
+    ) {
         LocalDateTime now = LocalDateTime.now(APP_ZONE);
 
         if (appointment.getStatus() != AppointmentStatus.BOOKED
@@ -179,14 +199,12 @@ public class AppointmentService {
         }
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
-        appointment.setCancelledBy(CancelledBy.EMPLOYEE);
+        appointment.setCancelledBy(cancelledBy);
         appointment.setUpdatedAt(now);
         slot.setStatus(SlotStatus.AVAILABLE);
 
         appointmentRepository.save(appointment);
         slotRepository.save(slot);
-
-        return toResponse(appointment);
     }
 
     private String normalizeReason(String reason) {
