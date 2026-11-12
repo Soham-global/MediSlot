@@ -51,3 +51,23 @@ export const PulseIcon = (props) => (
     <path d="M2.5 12H7l2.2-5.5 3.6 11 2.4-5.5h6.3" />
   </Icon>
 );
+
+export const SearchIcon = (props) => (
+  <Icon {...props}>
+    <circle cx="11" cy="11" r="6.5" />
+    <path d="m16 16 4.5 4.5" />
+  </Icon>
+);
+
+export const PinIcon = (props) => (
+  <Icon {...props}>
+    <path d="M12 21s6.5-5.6 6.5-11a6.5 6.5 0 1 0-13 0c0 5.4 6.5 11 6.5 11Z" />
+    <circle cx="12" cy="10" r="2.3" />
+  </Icon>
+);
+
+export const ArrowIcon = (props) => (
+  <Icon {...props}>
+    <path d="M4.5 12h15M13.5 6l6 6-6 6" />
+  </Icon>
+);

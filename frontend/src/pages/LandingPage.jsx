@@ -1,15 +1,24 @@
 import { Link } from 'react-router-dom';
+import {
+  ArrowIcon,
+  CalendarIcon,
+  CheckIcon,
+  SearchIcon,
+} from '../components/Icons';
 
 const FEATURES = [
   {
+    icon: <SearchIcon size={26} />,
     title: 'Find the right doctor',
-    text: 'Search by name, hospital or department across Motherson’s partner hospitals.',
+    text: 'Search by name, hospital or specialty across Motherson’s partner hospitals.',
   },
   {
+    icon: <CalendarIcon size={26} />,
     title: 'Pick a time that suits you',
     text: 'See real open slots up to two weeks ahead and book in a few taps.',
   },
   {
+    icon: <CheckIcon size={26} />,
     title: 'Stay in control',
     text: 'Review upcoming visits and cancel in one step if your plans change.',
   },
@@ -32,8 +41,9 @@ export default function LandingPage() {
               an appointment in minutes.
             </p>
             <div className="landing-actions">
-              <Link to="/doctors" className="btn btn-primary btn-lg">
+              <Link to="/doctors" className="btn btn-primary btn-lg btn-arrow">
                 Find a doctor
+                <ArrowIcon size={18} />
               </Link>
               <Link to="/login" className="btn btn-lg">
                 Employee sign in
@@ -41,32 +51,44 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="preview" aria-hidden="true">
-            <div className="preview-top">
-              <span className="avatar">Dr</span>
+          <div className="preview-wrap" aria-hidden="true">
+            <div className="preview">
+              <div className="preview-top">
+                <span className="avatar avatar-md preview-avatar">Dr</span>
+                <div>
+                  <div className="doctor-name">Book a visit</div>
+                  <div className="muted">Choose a time that works for you</div>
+                </div>
+              </div>
+              <p className="preview-label">Available times</p>
+              <div className="preview-slots">
+                {SAMPLE_SLOTS.map((slot, index) => (
+                  <div
+                    key={slot}
+                    className={`preview-slot${index === 1 ? ' is-active' : ''}`}
+                  >
+                    {slot}
+                  </div>
+                ))}
+              </div>
+              <div className="preview-confirm">Confirm 9:30 am</div>
+            </div>
+            <div className="preview-toast">
+              <span className="preview-toast-icon">
+                <CheckIcon size={18} />
+              </span>
               <div>
-                <div className="doctor-name">Book a visit</div>
-                <div className="muted">Choose a time that works for you</div>
+                <strong>Appointment booked</strong>
+                <span className="muted">We’ll see you soon</span>
               </div>
             </div>
-            <p className="preview-label">Available times</p>
-            <div className="preview-slots">
-              {SAMPLE_SLOTS.map((slot, index) => (
-                <div
-                  key={slot}
-                  className={`preview-slot${index === 1 ? ' is-active' : ''}`}
-                >
-                  {slot}
-                </div>
-              ))}
-            </div>
-            <div className="preview-confirm">Confirm 9:30 am</div>
           </div>
         </section>
 
         <section className="landing-features" aria-label="How it works">
           {FEATURES.map((feature, index) => (
             <div key={feature.title} className="feature">
+              <span className="feature-icon">{feature.icon}</span>
               <p className="feature-num">0{index + 1}</p>
               <h2>{feature.title}</h2>
               <p>{feature.text}</p>
@@ -78,8 +100,9 @@ export default function LandingPage() {
       <section className="landing-band">
         <div className="landing-band-inner">
           <h2>Your next appointment is a few clicks away.</h2>
-          <Link to="/doctors" className="btn btn-lg">
+          <Link to="/doctors" className="btn btn-lg btn-arrow">
             Find a doctor
+            <ArrowIcon size={18} />
           </Link>
         </div>
       </section>

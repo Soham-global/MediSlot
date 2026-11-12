@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Avatar from './Avatar';
 import Modal from './Modal';
 import { fetchDoctorSlots } from '../api/doctorsApi';
 import { bookAppointment } from '../api/appointmentsApi';
@@ -93,7 +94,9 @@ export default function BookingModal({ doctor, onClose }) {
       <Modal title="Appointment booked" onClose={onClose}>
         <div className="booked-box">
           <span className="booked-check" aria-hidden="true">
-            ✓
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path className="check-path" pathLength="1" d="m5 12.5 4.5 4.5L19 7" />
+            </svg>
           </span>
           <p className="booked-line">
             <strong>{doctor.name}</strong>
@@ -118,12 +121,20 @@ export default function BookingModal({ doctor, onClose }) {
 
   // ----- Booking form -----
   return (
-    <Modal title={`Book with ${doctor.name}`} onClose={onClose}>
-      <p className="muted modal-sub">
-        {doctor.specialization} · {doctor.hospital.name}
-      </p>
+    <Modal title="Book an appointment" onClose={onClose}>
+      <div className="booking-doctor">
+        <Avatar name={doctor.name} size="md" />
+        <div>
+          <strong>{doctor.name}</strong>
+          <p className="muted">
+            {doctor.specialization} · {doctor.hospital.name}
+          </p>
+        </div>
+      </div>
 
-      <h3 className="modal-label">Choose a day</h3>
+      <h3 className="modal-label">
+        <span className="step">1</span> Choose a day
+      </h3>
       <div className="date-strip">
         {dates.map((iso) => (
           <DayPill
@@ -135,7 +146,9 @@ export default function BookingModal({ doctor, onClose }) {
         ))}
       </div>
 
-      <h3 className="modal-label">Choose a time</h3>
+      <h3 className="modal-label">
+        <span className="step">2</span> Choose a time
+      </h3>
       {slotStatus === 'loading' ? (
         <div className="slot-grid" aria-hidden="true">
           {[1, 2, 3, 4, 5, 6].map((n) => (
@@ -176,7 +189,8 @@ export default function BookingModal({ doctor, onClose }) {
       )}
 
       <label className="modal-label" htmlFor="booking-reason">
-        Reason for visit <span className="muted">(optional)</span>
+        <span className="step">3</span> Reason for visit{' '}
+        <span className="optional">(optional)</span>
       </label>
       <textarea
         id="booking-reason"
@@ -190,6 +204,12 @@ export default function BookingModal({ doctor, onClose }) {
       <p className="char-count muted">
         {reason.length}/{MAX_REASON}
       </p>
+
+      {selectedSlot && (
+        <p className="booking-summary">
+          {formatDate(date)} · {formatTime(selectedSlot.startTime)}
+        </p>
+      )}
 
       {bookError && (
         <div className="alert-error" role="alert">

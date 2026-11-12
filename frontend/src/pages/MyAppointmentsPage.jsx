@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Avatar from '../components/Avatar';
 import ConfirmDialog from '../components/ConfirmDialog';
 import StatusBadge from '../components/StatusBadge';
 import {
@@ -16,12 +17,27 @@ const TABS = [
 
 const CANCELLABLE = ['BOOKED', 'CONFIRMED'];
 
-function AppointmentCard({ appointment, canCancel, onCancel }) {
+function whenLabel(date) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diff = Math.round(
+    (new Date(`${date}T00:00:00`) - today) / 86400000
+  );
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
+  if (diff > 1) return `In ${diff} days`;
+  return '';
+}
+
+function AppointmentCard({ appointment, isNext, canCancel, onCancel, index }) {
   const { slot, doctor, hospital } = appointment;
   const date = new Date(`${slot.date}T00:00:00`);
 
   return (
-    <article className="card appt-card">
+    <article
+      className={`card appt-card${isNext ? ' is-next' : ''}`}
+      style={{ '--i': Math.min(index, 8) }}
+    >
       <div className="appt-date" aria-hidden="true">
         <span>{date.toLocaleDateString('en-IN', { month: 'short' })}</span>
         <strong>{date.getDate()}</strong>
@@ -29,11 +45,17 @@ function AppointmentCard({ appointment, canCancel, onCancel }) {
       </div>
 
       <div className="appt-body">
+        {isNext && (
+          <p className="appt-eyebrow">
+            Next visit{whenLabel(slot.date) && ` · ${whenLabel(slot.date)}`}
+          </p>
+        )}
         <div className="appt-top">
+          <Avatar name={doctor.name} size="sm" />
           <h2 className="doctor-name">{doctor.name}</h2>
           <StatusBadge status={appointment.status} />
         </div>
-        <p className="muted">{doctor.specialization}</p>
+        <p className="muted appt-spec">{doctor.specialization}</p>
 
         <p className="appt-line">
           {formatDate(slot.date)} · {formatTime(slot.startTime)} –{' '}
@@ -130,9 +152,16 @@ export default function MyAppointmentsPage() {
     setTab(key);
   }
 
+  // Soonest first for upcoming, most recent first for past
+  const startOf = (item) => new Date(`${item.slot.date}T${item.slot.startTime}`);
+  const sorted = [...appointments].sort((a, b) =>
+    tab === 'upcoming' ? startOf(a) - startOf(b) : startOf(b) - startOf(a)
+  );
+
   return (
     <section className="page">
       <header className="page-head">
+        <p className="eyebrow">Your visits</p>
         <h1>My appointments</h1>
         <p className="page-sub">Keep track of your visits in one place.</p>
       </header>
@@ -189,11 +218,13 @@ export default function MyAppointmentsPage() {
           )}
         </div>
       ) : (
-        <div className="appt-list">
-          {appointments.map((appointment) => (
+        <div className="appt-list stagger">
+          {sorted.map((appointment, index) => (
             <AppointmentCard
               key={appointment.id}
               appointment={appointment}
+              index={index}
+              isNext={tab === 'upcoming' && index === 0}
               canCancel={
                 tab === 'upcoming' && CANCELLABLE.includes(appointment.status)
               }
