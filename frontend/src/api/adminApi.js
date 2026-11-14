@@ -1,69 +1,103 @@
-import client from './client';
+import client from "./client";
 
-// Remove empty filters so we never send ?date=&status= to the server
-function clean(params) {
-  return Object.fromEntries(
-    Object.entries(params).filter(([, v]) => v !== '' && v != null)
-  );
-}
+export const adminApi = {
+  getDashboard: () =>
+    client.get("/api/admin/dashboard").then((response) => response.data),
 
-// Returns { content, page, size, totalElements, totalPages }. page is 0-based.
-export async function fetchAdminAppointments(params = {}) {
-  const { data } = await client.get('/api/admin/appointments', {
-    params: clean(params),
-  });
-  return data;
-}
+  getHospital: () =>
+    client.get("/api/admin/hospital").then((response) => response.data),
 
-// action: 'confirm' | 'complete' | 'no-show' | 'cancel'
-export async function updateAdminAppointment(id, action) {
-  const { data } = await client.put(
-    `/api/admin/appointments/${id}/${action}`
-  );
-  return data;
-}
+  updateHospital: (payload) =>
+    client.put("/api/admin/hospital", payload).then((response) => response.data),
 
-// Used for the doctor dropdown in filters
-export async function fetchAdminDoctors(params = {}) {
-  const { data } = await client.get('/api/admin/doctors', {
-    params: clean(params),
-  });
-  return data;
-}
+  getDepartments: () =>
+    client.get("/api/admin/departments").then((response) => response.data),
 
-// { hospitalName, todayAppointments, pendingAppointments,
-//   completedToday, totalDoctors, doctorsAvailableToday }
-export async function fetchDashboard() {
-  const { data } = await client.get('/api/admin/dashboard');
-  return data;
-}
+  getDoctors: ({ name, departmentId, active } = {}) =>
+    client
+      .get("/api/admin/doctors", {
+        params: {
+          name: name || undefined,
+          departmentId: departmentId || undefined,
+          isActive: typeof active === "boolean" ? active : undefined,
+        },
+      })
+      .then((response) => response.data),
 
-export async function fetchAdminDepartments() {
-  const { data } = await client.get('/api/admin/departments');
-  return data;
-}
+  getDoctor: (id) =>
+    client.get(`/api/admin/doctors/${id}`).then((response) => response.data),
 
-// body: { name, departmentId, specialization, qualification, experienceYears }
-export async function createAdminDoctor(body) {
-  const { data } = await client.post('/api/admin/doctors', body);
-  return data;
-}
+  createDoctor: (payload) =>
+    client.post("/api/admin/doctors", payload).then((response) => response.data),
 
-export async function updateAdminDoctor(id, body) {
-  const { data } = await client.put(`/api/admin/doctors/${id}`, body);
-  return data;
-}
+  updateDoctor: (id, payload) =>
+    client.put(`/api/admin/doctors/${id}`, payload).then((response) => response.data),
 
-// Returns { id, isActive, upcomingAppointments }
-export async function setAdminDoctorActive(id, isActive) {
-  const { data } = await client.put(`/api/admin/doctors/${id}/status`, {
-    isActive,
-  });
-  return data;
-}
+  setDoctorStatus: (id, active) =>
+    client
+      .put(`/api/admin/doctors/${id}/status`, { isActive: active })
+      .then((response) => response.data),
 
-// Fails with 409 if the doctor has ever had an appointment
-export async function deleteAdminDoctor(id) {
-  const { data } = await client.delete(`/api/admin/doctors/${id}`);
-  return data;
-}
+  deleteDoctor: (id) =>
+    client.delete(`/api/admin/doctors/${id}`).then((response) => response.data),
+
+  replaceSchedule: (id, rules) =>
+    client
+      .put(`/api/admin/doctors/${id}/schedule`, { schedules: rules })
+      .then((response) => response.data),
+
+  getSlots: (id, date) =>
+    client
+      .get(`/api/admin/doctors/${id}/slots`, { params: date ? { date } : {} })
+      .then((response) => response.data),
+
+  blockSlots: (id, { startDate, endDate, startTime, endTime, reason }) =>
+    client
+      .post(`/api/admin/doctors/${id}/slots/block`, {
+        fromDate: startDate,
+        toDate: endDate,
+        startTime: startTime || null,
+        endTime: endTime || null,
+        reason,
+      })
+      .then((response) => response.data),
+
+  unblockSlot: (id) =>
+    client.put(`/api/admin/slots/${id}/unblock`).then((response) => response.data),
+
+  getAppointments: ({ doctorId, date, status, page = 0, size = 20 } = {}) =>
+    client
+      .get("/api/admin/appointments", {
+        params: {
+          doctorId: doctorId || undefined,
+          date: date || undefined,
+          status: status || undefined,
+          page,
+          size,
+        },
+      })
+      .then((response) => response.data),
+
+  getAppointment: (id) =>
+    client.get(`/api/admin/appointments/${id}`).then((response) => response.data),
+
+  confirmAppointment: (id) =>
+    client
+      .put(`/api/admin/appointments/${id}/confirm`)
+      .then((response) => response.data),
+
+  cancelAppointment: (id) =>
+    client
+      .put(`/api/admin/appointments/${id}/cancel`)
+      .then((response) => response.data),
+
+  completeAppointment: (id) =>
+    client
+      .put(`/api/admin/appointments/${id}/complete`)
+      .then((response) => response.data),
+
+  markNoShow: (id) =>
+    client
+      .put(`/api/admin/appointments/${id}/no-show`)
+      .then((response) => response.data),
+};

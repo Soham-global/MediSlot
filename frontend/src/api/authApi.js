@@ -1,29 +1,20 @@
-import client from './client';
+import client from "./client";
 
-export async function employeeLogin({ employeeCode, password }) {
-  const { data } = await client.post('/api/auth/login', {
-    employeeCode,
-    password,
-  });
+export const authApi = {
+  loginEmployee: (credentials) =>
+    client.post("/api/auth/login", credentials).then((response) => response.data),
 
-  return data;
-}
+  register: (payload) =>
+    client.post("/api/auth/register", payload).then((response) => response.data),
 
-export async function adminLogin({ email, password }) {
-  const { data } = await client.post('/api/admin/auth/login', {
-    email,
-    password,
-  });
+  getProfile: () => client.get("/api/auth/me").then((response) => response.data),
 
-  return data;
-}
+  updateProfile: (payload) =>
+    client.put("/api/employees/me", payload).then((response) => response.data),
 
-export async function employeeMe() {
-  const { data } = await client.get('/api/auth/me');
-  return data;
-}
+  loginAdmin: (credentials) =>
+    client.post("/api/admin/auth/login", credentials).then((response) => response.data),
 
-export async function adminMe() {
-  const { data } = await client.get('/api/admin/auth/me');
-  return data;
-}
+  getAdminProfile: () =>
+    client.get("/api/admin/auth/me").then((response) => response.data),
+};

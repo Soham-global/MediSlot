@@ -1,33 +1,20 @@
-import client from './client';
+import client from "./client";
 
-// Remove empty filters so we never send ?hospitalId=&name= to the server
-function clean(params) {
-  return Object.fromEntries(
-    Object.entries(params).filter(([, v]) => v !== '' && v != null)
-  );
-}
+export const doctorsApi = {
+  getDoctors: (params = {}) =>
+    client.get("/api/doctors", { params }).then((response) => response.data),
 
-export async function fetchDoctors(params = {}) {
-  const { data } = await client.get('/api/doctors', {
-    params: clean(params),
-  });
-  return data;
-}
+  getDoctor: (id) =>
+    client.get(`/api/doctors/${id}`).then((response) => response.data),
 
-export async function fetchHospitals() {
-  const { data } = await client.get('/api/hospitals');
-  return data;
-}
+  getDepartments: () =>
+    client.get("/api/departments").then((response) => response.data),
 
-export async function fetchDepartments() {
-  const { data } = await client.get('/api/departments');
-  return data;
-}
+  getHospitals: () =>
+    client.get("/api/hospitals").then((response) => response.data),
 
-// date must be "YYYY-MM-DD" and cannot be in the past
-export async function fetchDoctorSlots(doctorId, date) {
-  const { data } = await client.get(`/api/doctors/${doctorId}/slots`, {
-    params: { date },
-  });
-  return data;
-}
+  getSlots: (doctorId, date) =>
+    client
+      .get(`/api/doctors/${doctorId}/slots`, { params: { date } })
+      .then((response) => response.data),
+};

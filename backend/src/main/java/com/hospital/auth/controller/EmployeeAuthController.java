@@ -4,6 +4,7 @@ import com.hospital.auth.dto.EmployeeLoginResponse;
 import com.hospital.auth.dto.EmployeeProfileResponse;
 import com.hospital.auth.dto.LoginRequest;
 import com.hospital.auth.dto.MessageResponse;
+import com.hospital.auth.dto.RegisterRequest;
 import com.hospital.auth.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +26,11 @@ public class EmployeeAuthController {
     @PostMapping("/login")
     public EmployeeLoginResponse login(@Valid @RequestBody LoginRequest request) {
         return employeeService.login(request);
+    }
+
+    @PostMapping("/register")
+    public EmployeeLoginResponse register(@Valid @RequestBody RegisterRequest request) {
+        return employeeService.register(request);
     }
 
     @PostMapping("/logout")
