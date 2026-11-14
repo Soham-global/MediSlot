@@ -1,144 +1,103 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-import { adminMe, employeeMe } from '../api/authApi';
-import {
-  clearStoredSession,
-  ROLE_KEY,
-  TOKEN_KEY,
-  USER_KEY,
-} from '../api/client';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { authApi } from "../api/authApi";
 
 const AuthContext = createContext(null);
 
-const EMPTY_SESSION = {
-  token: null,
-  role: null,
-  user: null,
-};
+function readStoredAuth() {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+  const storedUser = localStorage.getItem("user");
 
-const VALID_ROLES = ['EMPLOYEE', 'HOSPITAL_ADMIN'];
+  if (!token || !role) {
+    return { token: null, role: null, user: null };
+  }
 
-function readStoredUser() {
   try {
-    const rawUser = localStorage.getItem(USER_KEY);
-    return rawUser ? JSON.parse(rawUser) : null;
+    return {
+      token,
+      role,
+      user: storedUser ? JSON.parse(storedUser) : null,
+    };
   } catch {
-    return null;
+    localStorage.removeItem("user");
+    return { token, role, user: null };
   }
 }
 
-function readInitialSession() {
-  const token = localStorage.getItem(TOKEN_KEY);
-  const role = localStorage.getItem(ROLE_KEY);
-  const user = readStoredUser();
-
-  if (
-    !token ||
-    !VALID_ROLES.includes(role) ||
-    !user ||
-    typeof user !== 'object'
-  ) {
-    if (token || role || user) {
-      clearStoredSession();
-    }
-
-    return EMPTY_SESSION;
-  }
-
-  return { token, role, user };
+export function homePathForRole(role) {
+  return role === "HOSPITAL_ADMIN" ? "/admin" : "/doctors";
 }
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(readInitialSession);
+  const [auth, setAuth] = useState(() => readStoredAuth());
+  const [loading, setLoading] = useState(true);
 
-  const login = useCallback((role, response) => {
-    const user =
-      role === 'EMPLOYEE' ? response?.employee : response?.admin;
-
-    if (!VALID_ROLES.includes(role) || !response?.token || !user) {
-      throw new Error('The login response was missing a token or user.');
-    }
-
-    const nextSession = {
-      token: response.token,
-      role,
-      user,
-    };
-
-    localStorage.setItem(TOKEN_KEY, nextSession.token);
-    localStorage.setItem(ROLE_KEY, nextSession.role);
-    localStorage.setItem(USER_KEY, JSON.stringify(nextSession.user));
-
-    setSession(nextSession);
-  }, []);
-
-  const logout = useCallback(() => {
-    clearStoredSession();
-    setSession(EMPTY_SESSION);
+  useEffect(() => {
+    setAuth(readStoredAuth());
+    setLoading(false);
   }, []);
 
   useEffect(() => {
-    if (!session.token || !session.role) {
-      return undefined;
+    const syncAuth = (event) => {
+      if (!event.key || ["token", "role", "user"].includes(event.key)) {
+        setAuth(readStoredAuth());
+      }
+    };
+
+    window.addEventListener("storage", syncAuth);
+    return () => window.removeEventListener("storage", syncAuth);
+  }, []);
+
+  const login = useCallback((token, role, user) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("role", role);
+    localStorage.setItem("user", JSON.stringify(user || null));
+    setAuth({ token, role, user: user || null });
+  }, []);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+    setAuth({ token: null, role: null, user: null });
+  }, []);
+
+  const refreshProfile = useCallback(async () => {
+    if (!auth.token || !auth.role) {
+      return null;
     }
 
-    let cancelled = false;
-    const loadProfile =
-      session.role === 'HOSPITAL_ADMIN' ? adminMe : employeeMe;
+    const profile =
+      auth.role === "HOSPITAL_ADMIN"
+        ? await authApi.getAdminProfile()
+        : await authApi.getProfile();
 
-    loadProfile()
-      .then((user) => {
-        if (cancelled || !user) {
-          return;
-        }
-
-        setSession((current) => {
-          if (current.token !== session.token) {
-            return current;
-          }
-
-          localStorage.setItem(USER_KEY, JSON.stringify(user));
-          return { ...current, user };
-        });
-      })
-      .catch(() => {});
-
-    return () => {
-      cancelled = true;
-    };
-  }, [session.token, session.role]);
+    localStorage.setItem("user", JSON.stringify(profile));
+    setAuth((current) => ({ ...current, user: profile }));
+    return profile;
+  }, [auth.token, auth.role]);
 
   const value = useMemo(
     () => ({
-      token: session.token,
-      role: session.role,
-      user: session.user,
-      isAuthenticated: Boolean(
-        session.token && session.role && session.user
-      ),
+      token: auth.token,
+      role: auth.role,
+      user: auth.user,
+      isAuthenticated: Boolean(auth.token && auth.role),
+      loading,
       login,
       logout,
+      refreshProfile,
     }),
-    [session, login, logout]
+    [auth, loading, login, logout, refreshProfile],
   );
 
-  return (
-    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-
   if (!context) {
-    throw new Error('useAuth must be used inside an AuthProvider');
+    throw new Error("useAuth must be used within AuthProvider");
   }
-
   return context;
 }

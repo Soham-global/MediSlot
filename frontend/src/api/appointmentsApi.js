@@ -1,22 +1,19 @@
-import client from './client';
+import client from "./client";
 
-export async function bookAppointment({ slotId, reason }) {
-  const { data } = await client.post('/api/appointments', {
-    slotId,
-    reason: reason?.trim() || null,
-  });
-  return data;
-}
+export const appointmentsApi = {
+  bookAppointment: ({ slotId, reason }) =>
+    client
+      .post("/api/appointments", { slotId, reason })
+      .then((response) => response.data),
 
-// status must be 'upcoming' or 'past' (anything else gives a 400 error)
-export async function fetchMyAppointments(status = 'upcoming') {
-  const { data } = await client.get('/api/appointments/my', {
-    params: { status },
-  });
-  return data;
-}
+  getMyAppointments: (status) =>
+    client
+      .get("/api/appointments/my", { params: status ? { status } : {} })
+      .then((response) => response.data),
 
-export async function cancelAppointment(id) {
-  const { data } = await client.put(`/api/appointments/${id}/cancel`);
-  return data;
-}
+  getAppointment: (id) =>
+    client.get(`/api/appointments/${id}`).then((response) => response.data),
+
+  cancelAppointment: (id) =>
+    client.put(`/api/appointments/${id}/cancel`).then((response) => response.data),
+};

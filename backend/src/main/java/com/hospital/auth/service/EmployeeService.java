@@ -7,15 +7,20 @@ import com.hospital.auth.dto.EmployeeProfileResponse;
 import com.hospital.auth.dto.EmployeeSummaryResponse;
 import com.hospital.auth.dto.LoginRequest;
 import com.hospital.auth.dto.MessageResponse;
+import com.hospital.auth.dto.RegisterRequest;
 import com.hospital.auth.dto.UpdateEmployeeProfileRequest;
 import com.hospital.auth.security.CurrentUser;
 import com.hospital.auth.security.JwtService;
 import com.hospital.auth.security.UserRole;
+import com.hospital.common.ConflictException;
 import com.hospital.common.ResourceNotFoundException;
 import com.hospital.common.UnauthorizedException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Locale;
 
 @Service
 public class EmployeeService {
@@ -46,14 +51,34 @@ public class EmployeeService {
             throw new UnauthorizedException("Invalid employee code or password");
         }
 
-        String token = jwtService.generateToken(employee.getId(), UserRole.EMPLOYEE, null);
+        return buildLoginResponse(employee);
+    }
 
-        return new EmployeeLoginResponse(
-                token,
-                "Bearer",
-                jwtService.getExpiryMinutes(),
-                toSummary(employee)
-        );
+    @Transactional
+    public EmployeeLoginResponse register(RegisterRequest request) {
+        String employeeCode = request.employeeCode().trim();
+        String email = request.email().trim().toLowerCase(Locale.ROOT);
+
+        if (employeeRepository.findByEmployeeCode(employeeCode).isPresent()) {
+            throw new ConflictException("An account with this employee code already exists");
+        }
+
+        if (employeeRepository.existsByEmail(email)) {
+            throw new ConflictException("An account with this email already exists");
+        }
+
+        Employee employee = new Employee();
+        employee.setEmployeeCode(employeeCode);
+        employee.setName(request.name().trim());
+        employee.setEmail(email);
+        employee.setPhone(normalizeOptional(request.phone()));
+        employee.setPasswordHash(passwordEncoder.encode(request.password()));
+
+        try {
+            return buildLoginResponse(employeeRepository.saveAndFlush(employee));
+        } catch (DataIntegrityViolationException exception) {
+            throw new ConflictException("An account with this employee code or email already exists");
+        }
     }
 
     public MessageResponse logout() {
@@ -78,6 +103,17 @@ public class EmployeeService {
     private Employee findCurrentEmployee() {
         return employeeRepository.findById(currentUser.userId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+    }
+
+    private EmployeeLoginResponse buildLoginResponse(Employee employee) {
+        String token = jwtService.generateToken(employee.getId(), UserRole.EMPLOYEE, null);
+
+        return new EmployeeLoginResponse(
+                token,
+                "Bearer",
+                jwtService.getExpiryMinutes(),
+                toSummary(employee)
+        );
     }
 
     private EmployeeSummaryResponse toSummary(Employee employee) {
