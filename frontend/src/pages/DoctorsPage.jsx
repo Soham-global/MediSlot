@@ -582,7 +582,7 @@ export default function DoctorsPage() {
             ) : (
               <motion.div
                 className="doctor-list"
-                key={`list-${activeFilters.map((filter) => `${filter.key}:${filter.value}`).join("|")}`}
+                key="list"
                 layout
                 initial={reduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
