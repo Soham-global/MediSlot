@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ﻿import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
@@ -16,19 +15,9 @@ import {
 } from "lucide-react";
 import { homePathForRole, useAuth } from "../context/AuthContext";
 import SymptomShowcase from "../components/SymptomShowcase";
-=======
-import { Link } from 'react-router-dom';
-import {
-  ArrowIcon,
-  CalendarIcon,
-  CheckIcon,
-  SearchIcon,
-} from '../components/Icons';
->>>>>>> origin/main
 
 const steps = [
   {
-<<<<<<< HEAD
     icon: Search,
     title: "Search",
     text: "Find a doctor by speciality, name, or hospital.",
@@ -42,21 +31,6 @@ const steps = [
     icon: ShieldCheck,
     title: "Get confirmed",
     text: "Book once and track the visit in your portal.",
-=======
-    icon: <SearchIcon size={26} />,
-    title: 'Find the right doctor',
-    text: 'Search by name, hospital or specialty across Motherson’s partner hospitals.',
-  },
-  {
-    icon: <CalendarIcon size={26} />,
-    title: 'Pick a time that suits you',
-    text: 'See real open slots up to two weeks ahead and book in a few taps.',
-  },
-  {
-    icon: <CheckIcon size={26} />,
-    title: 'Stay in control',
-    text: 'Review upcoming visits and cancel in one step if your plans change.',
->>>>>>> origin/main
   },
 ];
 
@@ -179,17 +153,10 @@ export default function LandingPage() {
             <p className="hero__lead">
               Find the right doctor, see live hospital availability, and book from one employee portal.
             </p>
-<<<<<<< HEAD
             <div className="hero__actions">
               <Link className="button button--primary button--large" to={carePath}>
                 {isAuthenticated ? "Open your dashboard" : "Find a doctor"}
                 <ArrowRight size={18} aria-hidden="true" />
-=======
-            <div className="landing-actions">
-              <Link to="/doctors" className="btn btn-primary btn-lg btn-arrow">
-                Find a doctor
-                <ArrowIcon size={18} />
->>>>>>> origin/main
               </Link>
               <Link className="button button--ghost button--large" to="/#how-it-works">
                 See how it works
@@ -202,7 +169,6 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-<<<<<<< HEAD
           <motion.div
             className="hero__visual"
             initial={{ opacity: 0, scale: 0.97, y: 20 }}
@@ -277,61 +243,6 @@ export default function LandingPage() {
             </div>
 
           </motion.div>
-=======
-          <div className="preview-wrap" aria-hidden="true">
-            <div className="preview">
-              <div className="preview-top">
-                <span className="avatar avatar-md preview-avatar">Dr</span>
-                <div>
-                  <div className="doctor-name">Book a visit</div>
-                  <div className="muted">Choose a time that works for you</div>
-                </div>
-              </div>
-              <p className="preview-label">Available times</p>
-              <div className="preview-slots">
-                {SAMPLE_SLOTS.map((slot, index) => (
-                  <div
-                    key={slot}
-                    className={`preview-slot${index === 1 ? ' is-active' : ''}`}
-                  >
-                    {slot}
-                  </div>
-                ))}
-              </div>
-              <div className="preview-confirm">Confirm 9:30 am</div>
-            </div>
-            <div className="preview-toast">
-              <span className="preview-toast-icon">
-                <CheckIcon size={18} />
-              </span>
-              <div>
-                <strong>Appointment booked</strong>
-                <span className="muted">We’ll see you soon</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="landing-features" aria-label="How it works">
-          {FEATURES.map((feature, index) => (
-            <div key={feature.title} className="feature">
-              <span className="feature-icon">{feature.icon}</span>
-              <p className="feature-num">0{index + 1}</p>
-              <h2>{feature.title}</h2>
-              <p>{feature.text}</p>
-            </div>
-          ))}
-        </section>
-      </main>
-
-      <section className="landing-band">
-        <div className="landing-band-inner">
-          <h2>Your next appointment is a few clicks away.</h2>
-          <Link to="/doctors" className="btn btn-lg btn-arrow">
-            Find a doctor
-            <ArrowIcon size={18} />
-          </Link>
->>>>>>> origin/main
         </div>
       </section>
 
